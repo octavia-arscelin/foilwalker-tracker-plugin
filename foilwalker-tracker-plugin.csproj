@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Dalamud.NET.Sdk/15.0.0">
+	<PropertyGroup>
+		<Version>0.0.2.0</Version>
+		<!-- Manifest fields (see https://github.com/goatcorp/DalamudPackager/blob/827d88dc/DalamudPackager/DalamudPackager.cs#L420) -->
+		<Author>Octavia</Author>
+		<Name>Foilwalker Tracker</Name>
+		<Punchline>A combat tracker for RP events.</Punchline>
+		<Description>
+			A combat tracker for RP events, specifically those using the SOBER combat system.
+		</Description>
+		<RepoUrl>https://github.com/octavia-arscelin/foilwalker-tracker/</RepoUrl>
+		<Tags>plugin;rp</Tags>
+	</PropertyGroup>
+
+	<!--
+  <ItemGroup>
+    <Content Include="..\Data\goat.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+  </ItemGroup>
+  -->
+</Project>
