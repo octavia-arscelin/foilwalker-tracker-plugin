@@ -10,6 +10,7 @@
 			A combat tracker for RP events, specifically those using the SOBER combat system.
 		</Description>
 		<RepoUrl>https://github.com/octavia-arscelin/foilwalker-tracker/</RepoUrl>
+		<IconUrl>https://raw.githubusercontent.com/octavia-arscelin/foilwalker-tracker-plugin/fwt_tracker_icon.png</IconUrl>
 		<Tags>plugin;rp</Tags>
 	</PropertyGroup>
 	<ItemGroup>

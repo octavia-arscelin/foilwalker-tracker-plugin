@@ -12,6 +12,7 @@
     "DalamudApiLevel": 15,
     "LastUpdate": 1787572296,
     "DownloadLinkInstall": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin/releases/download/0.0.2.0/foilwalker-tracker-plugin-v0.0.2.0.zip",
-    "DownloadLinkUpdate": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin/releases/download/0.0.2.0/foilwalker-tracker-plugin-v0.0.2.0.zip"
+    "DownloadLinkUpdate": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin/releases/download/0.0.2.0/foilwalker-tracker-plugin-v0.0.2.0.zip",
+    "IconUrl": "https://raw.githubusercontent.com/octavia-arscelin/foilwalker-tracker-plugin/fwt_tracker_icon.png"
   }
 ]
