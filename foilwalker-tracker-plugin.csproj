@@ -12,6 +12,13 @@
 		<RepoUrl>https://github.com/octavia-arscelin/foilwalker-tracker/</RepoUrl>
 		<Tags>plugin;rp</Tags>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="foilwalker-commons\**" />
+	  <EmbeddedResource Remove="foilwalker-commons\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="foilwalker-commons\foilwalker-commons.csproj" />
+	</ItemGroup>
 
 	<!--
   <ItemGroup>

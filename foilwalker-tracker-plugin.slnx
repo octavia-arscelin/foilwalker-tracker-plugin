@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="foilwalker-tracker-plugin.csproj" />
+  <Project Path="foilwalker-commons/foilwalker-commons.csproj" />
+  <Project Path="foilwalker-tracker-plugin.csproj">
+    <Platform Project="x64" />
+  </Project>
 </Solution>
