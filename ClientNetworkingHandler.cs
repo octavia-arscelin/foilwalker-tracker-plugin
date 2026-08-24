@@ -203,6 +203,7 @@ namespace FoilwalkerTracker
 
         internal void OnActionRequest(object? sender, FWTActionParameters e)
         {
+            if (e.target == null) return;
             SendMessage(new FWTActionRequest(plugin.gameId, -1, e,plugin.characterId));
         }
 
