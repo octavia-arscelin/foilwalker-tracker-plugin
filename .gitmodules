@@ -1,0 +1,3 @@
+[submodule "foilwalker-commons"]
+	path = foilwalker-commons
+	url = https://github.com/octavia-arscelin/foilwalker-commons
