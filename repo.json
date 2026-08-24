@@ -1,17 +1,17 @@
 [
-    {
-        "Author": "Octavia",
-        "Name": "Foilwalker Tracker",
-        "Punchline": "A combat tracker for RP events.",
-        "Description": "A combat tracker for RP events, specifically those using the SOBER combat system.",
-        "InternalName": "FoilwalkerTracker",
-        "AssemblyVersion": "0.0.2.0",
-        "IsTestingExclusive": false,
-        "RepoUrl": "https://github.com/octavia-arscelin/foilwalker-tracker",
-        "ApplicableVersion": "any",
-        "DalamudApiLevel": 15,
-        "LastUpdate": 1787572296,
-        "DownloadLinkInstall": "https://github.com/octavia-arscelin/foilwalker-tracker/releases/download/0.0.2.0/FWT_v0.0.2.0.zip",
-        "DownloadLinkUpdate": "https://github.com/octavia-arscelin/foilwalker-tracker/releases/download/0.0.2.0/FWT_v0.0.2.0.zip"
-    }
+  {
+    "Author": "Octavia",
+    "Name": "Foilwalker Tracker",
+    "Punchline": "A combat tracker for RP events.",
+    "Description": "A combat tracker for RP events, specifically those using the SOBER combat system.",
+    "InternalName": "FoilwalkerTracker",
+    "AssemblyVersion": "0.0.2.0",
+    "IsTestingExclusive": false,
+    "RepoUrl": "https://github.com/octavia-arscelin/foilwalker-tracker",
+    "ApplicableVersion": "any",
+    "DalamudApiLevel": 15,
+    "LastUpdate": 1787572296,
+    "DownloadLinkInstall": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin/releases/download/0.0.2.0/foilwalker-tracker-plugin-v0.0.2.0.zip",
+    "DownloadLinkUpdate": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin/releases/download/0.0.2.0/foilwalker-tracker-plugin-v0.0.2.0.zip"
+  }
 ]
