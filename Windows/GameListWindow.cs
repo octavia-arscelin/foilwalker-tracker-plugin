@@ -16,6 +16,10 @@ public class GameListWindow : Window, IDisposable
     private FWTGameWrapperSerializable[] wrappers = [];
     private FWTGameWrapperSerializable? selectedGame = null;
 
+    public event EventHandler<GameJoinRequestEventArgs> OnGameJoinRequest;
+    public event EventHandler<long> OnGameLeaveRequest;
+    public event EventHandler<GameCreateRequestEventArgs> OnGameCreateRequest;
+
     private string getRoleName(FWTCharacterRole role) {  return Utils.roleNames[role]; }
     private string characterName = "";
     private string gameName = "";
@@ -50,7 +54,7 @@ public class GameListWindow : Window, IDisposable
             ImGui.Text($"Currently playing {gameName}");
             if(ImGui.Button("Leave game"))
             {
-                //TODO: LEAVE GAME LOGIC
+                OnGameLeaveRequest?.Invoke(this, plugin.gameId);
             }
         }
         else
@@ -86,7 +90,7 @@ public class GameListWindow : Window, IDisposable
                     if (ImGui.Button("Join") && characterName.Length > 0)
                     {
                         var character = new FWTCharacter(characterName, Utils.roleNames.First(x => ((int)x.Key) == role).Key);
-                        plugin.RequestJoinGame(selectedGame, character);
+                        OnGameJoinRequest.Invoke(this,new GameJoinRequestEventArgs(selectedGame, character));
                     }
                 }
                 else
@@ -96,7 +100,7 @@ public class GameListWindow : Window, IDisposable
                     if (ImGui.Button("Join") && characterName.Length > 0 && gameName.Length > 0)
                     {
                         var character = new FWTCharacter(characterName, Utils.roleNames.First(x => ((int)x.Key) == role).Key);
-                        plugin.RequestCreateGame(gameName, character);
+                        OnGameCreateRequest.Invoke(this,new GameCreateRequestEventArgs(gameName, character));
                     }
                 }
             }
@@ -108,4 +112,16 @@ public class GameListWindow : Window, IDisposable
         connected = v == ConnectionStatus.AUTHENTICATION_SUCCESS;
         if (!connected) { selectedGame = null; wrappers = []; }
     }
+
+    public class GameJoinRequestEventArgs(FWTGameWrapperSerializable game, FWTCharacter character) : EventArgs
+    {
+        public FWTGameWrapperSerializable game = game;
+        public FWTCharacter character = character;
+    }
+    public class GameCreateRequestEventArgs(string gameName, FWTCharacter character) : EventArgs
+    {
+        public string gameName = gameName;
+        public FWTCharacter character = character;
+    }
 }
+

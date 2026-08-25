@@ -2,10 +2,8 @@ using FoilwalkerTracker.Windows;
 using FoilwalkerTrackerLib.Model;
 using FoilwalkerTrackerLib.Networking;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -27,6 +25,7 @@ namespace FoilwalkerTracker
         public event EventHandler<FWTGame> OnGameUpdate;
         public event EventHandler<FWTActionRequest> OnActionRequestReceived;
         public event EventHandler<FWTActionAcknowledge> OnActionAcknowledgeReceived;
+        public event EventHandler<FWTGameLeaveResponse> OnGameLeaveResponseReceived;
 
         private TcpClient? client;
         private NetworkStream? stream;
@@ -77,6 +76,7 @@ namespace FoilwalkerTracker
                         memoryStream.Write(bytes, 0, off);
                         i += off;
                     } while (stream.DataAvailable);
+                    if (memoryStream.Length == 0) break;
                     memoryStream.Seek(0, SeekOrigin.Begin);
                     var message = serializer.Deserialize(memoryStream) as FWTMessage;
                     memoryStream.Seek(0, SeekOrigin.Begin);
@@ -118,6 +118,12 @@ namespace FoilwalkerTracker
                                 if (inSerializer.Deserialize(memoryStream) is FWTActionAcknowledge response) HandleActionAcknowledge(response);
                             }
                             break;
+                        case MessageType.GAMELEAVE_RESPONSE:
+                            {
+                                var inSerializer = new XmlSerializer(typeof(FWTGameLeaveResponse));
+                                if (inSerializer.Deserialize(memoryStream) is FWTGameLeaveResponse response) HandleGameLeaveResponse(response);
+                            }
+                            break;
                         default:
                             Console.WriteLine("Unknown message type; discarded");
                             break;
@@ -133,6 +139,15 @@ namespace FoilwalkerTracker
                     OnConnectionUpdate(this, ConnectionStatus.CONNECTION_LOST);
                     break;
                 }
+            }
+            OnConnectionUpdate.Invoke(this, ConnectionStatus.OFFLINE);
+        }
+
+        private void HandleGameLeaveResponse(FWTGameLeaveResponse response)
+        {
+            if(response.gameId == plugin.gameId)
+            {
+                OnGameLeaveResponseReceived.Invoke(this, response);
             }
         }
 
@@ -219,9 +234,31 @@ namespace FoilwalkerTracker
 
         internal void Disconnect()
         {
-            client?.Close();
-            Thread.Sleep(10);
-            OnConnectionUpdate(this, ConnectionStatus.OFFLINE);
+            SendMessage(new FWTLogoffRequest());
+        }
+
+        internal void OnGameCreateRequest(object? sender, GameListWindow.GameCreateRequestEventArgs e)
+        {
+            if (plugin.connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS && plugin.currentGame == null)
+            {
+                SendMessage(new FWTGameCreateRequest(e.gameName, e.character));
+            }
+        }
+
+        internal void OnGameJoinRequest(object? sender, GameListWindow.GameJoinRequestEventArgs e)
+        {
+            if (plugin.connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS && plugin.currentGame == null)
+            {
+                SendMessage(new FWTGameJoinRequest(e.game.id, e.character));
+            }
+        }
+
+        internal void OnGameLeaveRequest(object? sender, long e)
+        {
+            if (plugin.connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS && plugin.currentGame != null)
+            {
+                SendMessage(new FWTGameLeaveRequest(e));
+            }
         }
 
         internal class GameJoinResponseEventArgs(FWTGame game, long characterId, long gameId, bool admin)

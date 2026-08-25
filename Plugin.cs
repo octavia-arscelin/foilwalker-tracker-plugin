@@ -90,6 +90,8 @@ public sealed class Plugin : IDalamudPlugin
         ClientNetworkingHandler.OnGameListReceived += GameListWindow.OnGameListReceived;
 
         //Game join
+        GameListWindow.OnGameCreateRequest += ClientNetworkingHandler.OnGameCreateRequest;
+        GameListWindow.OnGameJoinRequest += ClientNetworkingHandler.OnGameJoinRequest;
         ClientNetworkingHandler.OnGameJoin += OnGameJoin;
 
         //Game update
@@ -105,6 +107,9 @@ public sealed class Plugin : IDalamudPlugin
 
         GameRequestsWindow.OnRequestAcknowledged += ClientNetworkingHandler.OnRequestAcknowledged;
         GameRequestsWindow.OnRequestDenied += ClientNetworkingHandler.OnRequestDenied;
+
+        GameListWindow.OnGameLeaveRequest += ClientNetworkingHandler.OnGameLeaveRequest;
+        ClientNetworkingHandler.OnGameLeaveResponseReceived += OnGameLeave;
 
         Log.Information($"=== Initialization complete ===");
     }
@@ -138,6 +143,8 @@ public sealed class Plugin : IDalamudPlugin
         ClientNetworkingHandler.OnGameListReceived -= GameListWindow.OnGameListReceived;
 
         //Game join
+        GameListWindow.OnGameCreateRequest -= ClientNetworkingHandler.OnGameCreateRequest;
+        GameListWindow.OnGameJoinRequest -= ClientNetworkingHandler.OnGameJoinRequest;
         ClientNetworkingHandler.OnGameJoin -= OnGameJoin;
 
         //Game update
@@ -153,6 +160,9 @@ public sealed class Plugin : IDalamudPlugin
 
         GameRequestsWindow.OnRequestAcknowledged -= ClientNetworkingHandler.OnRequestAcknowledged;
         GameRequestsWindow.OnRequestDenied -= ClientNetworkingHandler.OnRequestDenied;
+
+        GameListWindow.OnGameLeaveRequest -= ClientNetworkingHandler.OnGameLeaveRequest;
+        ClientNetworkingHandler.OnGameLeaveResponseReceived -= OnGameLeave;
 
         //Final dispose
         ClientNetworkingHandler.Dispose();
@@ -260,14 +270,6 @@ public sealed class Plugin : IDalamudPlugin
         }
     }
 
-    internal void RequestJoinGame(FWTGameWrapperSerializable selectedGame, FWTCharacter fWTCharacter)
-    {
-        if(connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS && currentGame == null)
-        {
-            ClientNetworkingHandler.SendMessage(new FWTGameJoinRequest(selectedGame.id,fWTCharacter));
-        }
-    }
-
     internal void RequestGameList()
     {
         if(connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS)
@@ -279,14 +281,6 @@ public sealed class Plugin : IDalamudPlugin
     public void outputToLog(string message)
     {
         Log.Info(message);
-    }
-
-    internal void RequestCreateGame(string name, FWTCharacter character)
-    {
-        if (connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS)
-        {
-            ClientNetworkingHandler.SendMessage(new FWTGameCreateRequest(name,character));
-        }
     }
 
     internal void OnGameJoin(object? sender, ClientNetworkingHandler.GameJoinResponseEventArgs e)
@@ -303,9 +297,18 @@ public sealed class Plugin : IDalamudPlugin
 
     internal void Disconnect()
     {
+        OnGameLeave(this,new FWTGameLeaveResponse(gameId));
         ClientNetworkingHandler.Disconnect();
+    }
+
+    private void OnGameLeave(object? sender, FWTGameLeaveResponse e)
+    {
         currentGame = null;
-        gameId = -1;
         characterId = -1;
+        gameId = -1;
+        if (!GameListWindow.IsOpen) GameListWindow.Toggle();
+        if (GameWindow.IsOpen) GameWindow.Toggle();
+        if (GameRequestsWindow.IsOpen) GameRequestsWindow.Toggle();
+        if (GameAdminWindow.IsOpen) GameAdminWindow.Toggle();
     }
 }

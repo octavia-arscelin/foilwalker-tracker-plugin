@@ -5,7 +5,7 @@
     "Punchline": "A combat tracker for RP events.",
     "Description": "A combat tracker for RP events, specifically those using the SOBER combat system.",
     "InternalName": "foilwalker-tracker-plugin",
-    "AssemblyVersion": "0.0.2.0",
+    "AssemblyVersion": "0.0.3.0",
     "IsTestingExclusive": false,
     "RepoUrl": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin",
     "ApplicableVersion": "any",
