@@ -3,7 +3,10 @@ using FoilwalkerTrackerLib.Model;
 using FoilwalkerTrackerLib.Networking;
 using System;
 using System.IO;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -12,7 +15,7 @@ namespace FoilwalkerTracker
 {
     public enum ConnectionStatus
     {
-        OFFLINE, CONNECTING, SOCKET_ESTABLISHED, SOCKET_FAILURE, AUTHENTICATION_SUCCESS, AUTHENTICATION_FAILURE, CONNECTION_LOST
+        OFFLINE, CONNECTING, SOCKET_ESTABLISHED, SOCKET_FAILURE, LOGIN_SUCCESS, LOGIN_FAILURE, CONNECTION_LOST, AUTHENTICATION_FAILURE
     }
 
     internal class ClientNetworkingHandler(Plugin plugin) : IDisposable
@@ -28,25 +31,38 @@ namespace FoilwalkerTracker
         public event EventHandler<FWTGameLeaveResponse> OnGameLeaveResponseReceived;
 
         private TcpClient? client;
-        private NetworkStream? stream;
+        private SslStream? stream;
 
         public async Task<int> ConnectToServerAsync(string host, int port)
         {
-            try
-            {
                 client = new TcpClient();
                 await client.ConnectAsync(host, port);
-                stream = client.GetStream();
-                OnConnectionUpdate.Invoke(this, ConnectionStatus.SOCKET_ESTABLISHED);
-                Task.Run(() => receiveMessagesAsync());
-                return 0;
-            }
-            catch(Exception ex)
-            {
-                OnConnectionUpdate.Invoke(this,ConnectionStatus.SOCKET_FAILURE);
-                plugin.outputToLog(ex.Message);
-                return -1;
-            }
+                stream = new SslStream(client.GetStream(), false, new RemoteCertificateValidationCallback(ValidateServerCertificate), null);
+                try
+                {
+                    stream.AuthenticateAsClient(host);
+                    OnConnectionUpdate.Invoke(this, ConnectionStatus.SOCKET_ESTABLISHED);
+                    Task.Run(() => receiveMessagesAsync());
+                    return 0;
+                }
+                catch(AuthenticationException ex)
+                {
+                    OnConnectionUpdate.Invoke(this, ConnectionStatus.AUTHENTICATION_FAILURE);
+                    return -5;
+                }
+                catch(Exception ex)
+                {
+                    OnConnectionUpdate.Invoke(this,ConnectionStatus.SOCKET_FAILURE);
+                    plugin.outputToLog(ex.Message);
+                    return -1;
+                }
+        }
+
+        private bool ValidateServerCertificate(object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors)
+        {
+            if (sslPolicyErrors == SslPolicyErrors.None) return true;
+            plugin.outputToLog($"Certificate error: {sslPolicyErrors}");
+            return false;
         }
 
         public int SendMessage<T>(T message) where T : FWTMessage
@@ -68,14 +84,10 @@ namespace FoilwalkerTracker
                 try
                 {
                     MemoryStream memoryStream = new MemoryStream();
-                    var bytes = new byte[2048];
+                    var bytes = new byte[2048*32];
                     var i = 0;
-                    do
-                    {
-                        var off = stream.Read(bytes, 0, bytes.Length);
-                        memoryStream.Write(bytes, 0, off);
-                        i += off;
-                    } while (stream.DataAvailable);
+                    var off = stream.Read(bytes, 0, bytes.Length);
+                    memoryStream.Write(bytes, 0, off);
                     if (memoryStream.Length == 0) break;
                     memoryStream.Seek(0, SeekOrigin.Begin);
                     var message = serializer.Deserialize(memoryStream) as FWTMessage;
@@ -133,6 +145,11 @@ namespace FoilwalkerTracker
                 {
                     plugin.outputToLog(ex.Message);
                     plugin.outputToLog(ex.StackTrace);
+                    if (ex.InnerException != null) 
+                    { 
+                        plugin.outputToLog(ex.InnerException.Message);
+                        plugin.outputToLog(ex.InnerException.StackTrace);
+                    }
                     plugin.outputToLog("Unhandled exception : disconnecting");
                     if (stream != null) stream.Dispose();
                     if (client != null) client.Dispose();
@@ -185,9 +202,9 @@ namespace FoilwalkerTracker
 
         private void HandleLoginResponse(FWTLoginResponse response)
         {
-            if (response.success == 0) { OnConnectionUpdate.Invoke(this, ConnectionStatus.AUTHENTICATION_SUCCESS); SendMessage(new FWTGameListRequest()); }
-            else if (response.success == 2) { OnConnectionUpdate.Invoke(this, ConnectionStatus.AUTHENTICATION_SUCCESS); SendMessage(new FWTGameListRequest()); }
-            else { OnConnectionUpdate.Invoke(this, ConnectionStatus.AUTHENTICATION_FAILURE); }
+            if (response.success == 0) { OnConnectionUpdate.Invoke(this, ConnectionStatus.LOGIN_SUCCESS); SendMessage(new FWTGameListRequest()); }
+            else if (response.success == 2) { OnConnectionUpdate.Invoke(this, ConnectionStatus.LOGIN_SUCCESS); SendMessage(new FWTGameListRequest()); }
+            else { OnConnectionUpdate.Invoke(this, ConnectionStatus.LOGIN_FAILURE); }
         }
 
         private void HandleGameListResponse(FWTGameListResponse response)
@@ -239,7 +256,7 @@ namespace FoilwalkerTracker
 
         internal void OnGameCreateRequest(object? sender, GameListWindow.GameCreateRequestEventArgs e)
         {
-            if (plugin.connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS && plugin.currentGame == null)
+            if (plugin.connectionStatus == ConnectionStatus.LOGIN_SUCCESS && plugin.currentGame == null)
             {
                 SendMessage(new FWTGameCreateRequest(e.gameName, e.character));
             }
@@ -247,7 +264,7 @@ namespace FoilwalkerTracker
 
         internal void OnGameJoinRequest(object? sender, GameListWindow.GameJoinRequestEventArgs e)
         {
-            if (plugin.connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS && plugin.currentGame == null)
+            if (plugin.connectionStatus == ConnectionStatus.LOGIN_SUCCESS && plugin.currentGame == null)
             {
                 SendMessage(new FWTGameJoinRequest(e.game.id, e.character));
             }
@@ -255,7 +272,7 @@ namespace FoilwalkerTracker
 
         internal void OnGameLeaveRequest(object? sender, long e)
         {
-            if (plugin.connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS && plugin.currentGame != null)
+            if (plugin.connectionStatus == ConnectionStatus.LOGIN_SUCCESS && plugin.currentGame != null)
             {
                 SendMessage(new FWTGameLeaveRequest(e));
             }

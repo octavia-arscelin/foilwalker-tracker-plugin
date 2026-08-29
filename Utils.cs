@@ -25,9 +25,10 @@ namespace FoilwalkerTracker
             {ConnectionStatus.CONNECTING, "Connecting..." },
             {ConnectionStatus.SOCKET_ESTABLISHED, "Socket established"},
             {ConnectionStatus.SOCKET_FAILURE, "Socket failed to open"},
-            {ConnectionStatus.AUTHENTICATION_SUCCESS, "Connected"},
-            {ConnectionStatus.AUTHENTICATION_FAILURE, "Authentication failed; check your password"},
-            {ConnectionStatus.CONNECTION_LOST, "Connection lost"}
+            {ConnectionStatus.LOGIN_SUCCESS, "Connected"},
+            {ConnectionStatus.LOGIN_FAILURE, "Login failed; check your password"},
+            {ConnectionStatus.CONNECTION_LOST, "Connection lost"},
+            {ConnectionStatus.AUTHENTICATION_FAILURE, "Server certificate was invalid"},
         };
     }
 }

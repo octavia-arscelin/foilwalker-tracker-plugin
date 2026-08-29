@@ -30,7 +30,7 @@ public class LoginWindow : Window, IDisposable
         ImGui.InputText("Password", ref password, flags:ImGuiInputTextFlags.Password);
 
         ImGui.Spacing();
-        if(plugin.connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS)
+        if(plugin.connectionStatus == ConnectionStatus.LOGIN_SUCCESS)
         {
             if (ImGui.Button("Disconnect"))
             {

@@ -66,7 +66,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "Open the current context window."
+            HelpMessage = "Open the current context's window."
         });
 
         // Tell the UI system that we want our windows to be drawn through the window system
@@ -77,7 +77,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
 
         // Adds another button doing the same but for the main ui of the plugin
-        PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
+        PluginInterface.UiBuilder.OpenMainUi += ContextualizedWindowToggle;
 
         //Chat interaction
         ChatGui.ChatMessage += GameWindow.OnChatMessage;
@@ -119,8 +119,8 @@ public sealed class Plugin : IDalamudPlugin
         // Unregister all actions to not leak anything during disposal of plugin
         PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
-        PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
-        
+        PluginInterface.UiBuilder.OpenMainUi -= ContextualizedWindowToggle;
+
         WindowSystem.RemoveAllWindows();
 
         ConfigWindow.Dispose();
@@ -174,21 +174,7 @@ public sealed class Plugin : IDalamudPlugin
         switch (command)
         {
             case "/fwt":
-                if (sargs.Length == 0)
-                {
-                    if (connectionStatus != ConnectionStatus.AUTHENTICATION_SUCCESS) LoginWindow.Toggle();
-                    else if (currentGame == null) GameListWindow.Toggle();
-                    else if (!GameWindow.IsOpen && !GameRequestsWindow.IsOpen)
-                    {
-                        GameWindow.Toggle();
-                        GameRequestsWindow.Toggle();
-                    }
-                    else
-                    {
-                        if (GameWindow.IsOpen) GameWindow.Toggle();
-                        if (GameRequestsWindow.IsOpen) GameRequestsWindow.Toggle();
-                    }
-                }
+                if (sargs.Length == 0) { ContextualizedWindowToggle(); return; }
                 var args = sargs.Split(" ");
                 switch (args[0])
                 {
@@ -213,6 +199,9 @@ public sealed class Plugin : IDalamudPlugin
                     case "admin":
                         GameAdminWindow.Toggle();
                         break;
+                    case "settings":
+                        ConfigWindow.Toggle();
+                        break;
                 }
                 break;
             default:
@@ -221,8 +210,6 @@ public sealed class Plugin : IDalamudPlugin
     }
     
     public void ToggleConfigUi() => ConfigWindow.Toggle();
-    public void ToggleMainUi() => GameListWindow.Toggle();
-    public void ToggleLoginUi() => LoginWindow.Toggle();
 
     public async Task<int> RequestServerConnection(string password)
     {
@@ -257,7 +244,7 @@ public sealed class Plugin : IDalamudPlugin
     private void OnConnectionUpdate(object? sender, ConnectionStatus message)
     {
         connectionStatus = message;
-        if(message != ConnectionStatus.AUTHENTICATION_SUCCESS)
+        if(message != ConnectionStatus.LOGIN_SUCCESS)
         {
             currentGame = null;
             gameId = -1;
@@ -272,7 +259,7 @@ public sealed class Plugin : IDalamudPlugin
 
     internal void RequestGameList()
     {
-        if(connectionStatus == ConnectionStatus.AUTHENTICATION_SUCCESS)
+        if(connectionStatus == ConnectionStatus.LOGIN_SUCCESS)
         {
             ClientNetworkingHandler.SendMessage(new FWTGameListRequest());
         }
@@ -310,5 +297,22 @@ public sealed class Plugin : IDalamudPlugin
         if (GameWindow.IsOpen) GameWindow.Toggle();
         if (GameRequestsWindow.IsOpen) GameRequestsWindow.Toggle();
         if (GameAdminWindow.IsOpen) GameAdminWindow.Toggle();
+    }
+
+    private void ContextualizedWindowToggle()
+    {
+        if (connectionStatus != ConnectionStatus.LOGIN_SUCCESS) LoginWindow.Toggle();
+        else if (currentGame == null) GameListWindow.Toggle();
+        else if (!GameWindow.IsOpen && !GameRequestsWindow.IsOpen)
+        {
+            GameWindow.Toggle();
+            GameRequestsWindow.Toggle();
+        }
+        else
+        {
+            if (GameWindow.IsOpen) GameWindow.Toggle();
+            if (GameRequestsWindow.IsOpen) GameRequestsWindow.Toggle();
+        }
+        ;
     }
 }

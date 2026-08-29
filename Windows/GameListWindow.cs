@@ -109,7 +109,7 @@ public class GameListWindow : Window, IDisposable
 
     internal void OnConnectionUpdate(object? sender, ConnectionStatus v)
     {
-        connected = v == ConnectionStatus.AUTHENTICATION_SUCCESS;
+        connected = v == ConnectionStatus.LOGIN_SUCCESS;
         if (!connected) { selectedGame = null; wrappers = []; }
     }
 
