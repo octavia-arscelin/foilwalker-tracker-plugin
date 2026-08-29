@@ -5,14 +5,14 @@
     "Punchline": "A combat tracker for RP events.",
     "Description": "A combat tracker for RP events, specifically those using the SOBER combat system.",
     "InternalName": "foilwalker-tracker-plugin",
-    "AssemblyVersion": "0.0.3.0",
+    "AssemblyVersion": "0.1.0.0",
     "IsTestingExclusive": false,
     "RepoUrl": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
-    "LastUpdate": 1787572296,
-    "DownloadLinkInstall": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin/releases/download/0.0.3.0/foilwalker-tracker-plugin-v0.0.3.0.zip",
-    "DownloadLinkUpdate": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin/releases/download/0.0.3.0/foilwalker-tracker-plugin-v0.0.3.0.zip",
+    "LastUpdate": 1788045751,
+    "DownloadLinkInstall": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin/releases/download/0.1.0.0/foilwalker-tracker-plugin-v0.1.0.0.zip",
+    "DownloadLinkUpdate": "https://github.com/octavia-arscelin/foilwalker-tracker-plugin/releases/download/0.1.0.0/foilwalker-tracker-plugin-v0.1.0.0.zip",
     "IconUrl": "https://raw.githubusercontent.com/octavia-arscelin/foilwalker-tracker-plugin/master/fwt_tracker_icon.png"
   }
 ]
