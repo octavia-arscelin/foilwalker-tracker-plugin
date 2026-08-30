@@ -40,7 +40,7 @@ namespace FoilwalkerTracker
                 stream = new SslStream(client.GetStream(), false, new RemoteCertificateValidationCallback(ValidateServerCertificate), null);
                 try
                 {
-                    stream.AuthenticateAsClient(host);
+                    await stream.AuthenticateAsClientAsync(host,null,SslProtocols.Tls12 | SslProtocols.Tls13,true);
                     OnConnectionUpdate.Invoke(this, ConnectionStatus.SOCKET_ESTABLISHED);
                     Task.Run(() => receiveMessagesAsync());
                     return 0;
